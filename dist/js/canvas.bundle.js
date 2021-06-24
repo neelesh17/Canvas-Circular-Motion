@@ -124,52 +124,76 @@ addEventListener('resize', function () {
   init();
 }); // Objects
 
-var _Object = /*#__PURE__*/function () {
-  function Object(x, y, radius, color) {
-    _classCallCheck(this, Object);
+var Particle = /*#__PURE__*/function () {
+  function Particle(x, y, radius, color) {
+    _classCallCheck(this, Particle);
 
     this.x = x;
     this.y = y;
     this.radius = radius;
     this.color = color;
+    this.radians = Math.random() * Math.PI * 2;
+    this.velocity = 0.05;
+    this.distaceFromCenter = {
+      x: _utils__WEBPACK_IMPORTED_MODULE_0___default.a.randomIntFromRange(50, 120),
+      y: _utils__WEBPACK_IMPORTED_MODULE_0___default.a.randomIntFromRange(50, 120)
+    };
+    this.lastMouse = {
+      x: x,
+      y: y
+    };
   }
 
-  _createClass(Object, [{
+  _createClass(Particle, [{
     key: "draw",
-    value: function draw() {
+    value: function draw(lastPoint) {
       c.beginPath();
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-      c.fillStyle = this.color;
-      c.fill();
+      c.strokeStyle = this.color;
+      c.lineWidth = this.radius;
+      c.moveTo(lastPoint.x, lastPoint.y);
+      c.lineTo(this.x, this.y);
+      c.stroke();
       c.closePath();
     }
   }, {
     key: "update",
     value: function update() {
-      this.draw();
+      var lastPoint = {
+        x: this.x,
+        y: this.y
+      };
+      this.radians += this.velocity;
+      this.lastMouse.x += (mouse.x - this.lastMouse.x) * 0.05;
+      this.lastMouse.y += (mouse.y - this.lastMouse.y) * 0.05;
+      this.x = this.lastMouse.x + Math.cos(this.radians) * this.distaceFromCenter.x;
+      this.y = this.lastMouse.y + Math.sin(this.radians) * this.distaceFromCenter.y;
+      this.draw(lastPoint);
     }
   }]);
 
-  return Object;
+  return Particle;
 }(); // Implementation
 
 
-var objects;
+var particles;
 
 function init() {
-  objects = [];
+  particles = [];
 
-  for (var i = 0; i < 400; i++) {// objects.push()
+  for (var i = 0; i < 100; i++) {
+    var radius = Math.random() * 2 + 1;
+    particles.push(new Particle(canvas.width / 2, canvas.height / 2, radius, _utils__WEBPACK_IMPORTED_MODULE_0___default.a.randomColor(colors)));
   }
 } // Animation Loop
 
 
 function animate() {
   requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
-  c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y); // objects.forEach(object => {
-  //  object.update()
-  // })
+  c.fillStyle = "rgba(255,255,255,0.05)";
+  c.fillRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(function (particle) {
+    particle.update();
+  });
 }
 
 init();
